@@ -28,17 +28,21 @@ public class PetService {
         Pet pet = request.toEntity();
         pet.setId(nextId++);
         pet.setUserId(userId);
-        pets.put(pet.id(),pet);
+        pets.put(pet.id(), pet);
         user.addPet(pet);
 
         return pet;
     }
 
     public Pet updatePet(Long userId, Long id, PetDto request) {
-        OwnerPetDto ownerPet = getUserAndCheckAccessToThemAll(userId,id);
+        OwnerPetDto ownerPet = getUserAndCheckAccessToThemAll(userId, id);
         Pet pet = request.toEntity();
-        pets.replace(id, pet);
-        ownerPet.owner().updatePet(pet);
+        pet.setId(id);
+        pet.setUserId(userId);
+        if (!ownerPet.pet().name().equals(pet.name())) {
+            pets.replace(id, pet);
+            ownerPet.owner().updatePet(pet);
+        }
 
         return pet;
     }
