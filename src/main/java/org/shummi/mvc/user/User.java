@@ -4,6 +4,7 @@ import org.shummi.mvc.pet.Pet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class User {
     private Long id;
@@ -61,5 +62,29 @@ public class User {
 
     public void setPets(List<Pet> pets) {
         this.pets = pets;
+    }
+
+    public void addPet(Pet pet) {
+        pets.add(pet);
+    }
+
+    public void updatePet(Pet pet) {
+        int index = pets.indexOf(pet);
+        pets.set(index, pet);
+    }
+
+    public void removePet(Pet pet) {
+        pets.remove(pet);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("name='" + name + "'")
+                .add("email='" + email + "'")
+                .add("age=" + age)
+                .add("pets=" + pets)
+                .toString();
     }
 }
