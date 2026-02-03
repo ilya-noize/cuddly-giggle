@@ -1,6 +1,8 @@
 package org.shummi.mvc.controller;
 
 import jakarta.validation.Valid;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.shummi.mvc.pet.Pet;
 import org.shummi.mvc.pet.model.PetDto;
 import org.shummi.mvc.service.PetService;
@@ -18,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/users")
 public class PetController {
+    private final Logger log = LogManager.getLogger(getClass());
     private final PetService petService;
 
     public PetController(PetService petService) {
@@ -29,40 +32,46 @@ public class PetController {
             @PathVariable Long userId,
             @RequestBody @Valid PetDto request
     ) {
+        log.info("Creating new pet: {} for user by ID: {}", request, userId);
+
         return petService.createPet(userId, request);
     }
 
-    @PutMapping("{userId}/pets/{id}")
+    @PutMapping("{userId}/pets/{petId}")
     public Pet update(
             @PathVariable Long userId,
-            @PathVariable Long id,
+            @PathVariable Long petId,
             @RequestBody @Valid PetDto request
     ) {
-        return petService.updatePet(userId, id, request);
+        log.debug("Updating existing pets={} by ID={} with owner by ID={}", request, petId, userId);
+        return petService.updatePet(userId, petId, request);
     }
 
-    @GetMapping("{userId}/pets/{id}")
+    @GetMapping("{userId}/pets/{petId}")
     public Pet get(
             @PathVariable Long userId,
-            @PathVariable Long id
+            @PathVariable Long petId
     ) {
-        return petService.getPetById(userId, id);
+        log.debug("Getting pet by ID={} and its' owners's ID={}", petId, userId);
+
+        return petService.getPetById(userId, petId);
     }
 
     @GetMapping("{userId}/pets")
     public List<Pet> getAll(
             @PathVariable Long userId
     ) {
+        log.debug("Getting all pets by owner's ID={}", userId);
+
         return petService.getAllPets(userId);
     }
 
-    @DeleteMapping("{userId}/pets/{id}")
+    @DeleteMapping("{userId}/pets/{petId}")
     public void delete(
             @PathVariable Long userId,
-            @PathVariable Long id
+            @PathVariable Long petId
     ) {
-        petService.deleteById(userId, id);
+        log.debug("Deleting pet by ID={} and its' owners's ID={}", petId, userId);
+        petService.deleteById(userId, petId);
     }
-
-    //todo Ensure you have unit tests for each of these endpoints.
 }
