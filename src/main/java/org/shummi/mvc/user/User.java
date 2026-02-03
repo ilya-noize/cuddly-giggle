@@ -24,7 +24,7 @@ public class User {
         this.pets = pets;
     }
 
-    public Long id() {
+    public Long getId() {
         return id;
     }
 
@@ -32,7 +32,7 @@ public class User {
         this.id = id;
     }
 
-    public String name() {
+    public String getName() {
         return name;
     }
 
@@ -40,7 +40,7 @@ public class User {
         this.name = name;
     }
 
-    public String email() {
+    public String getEmail() {
         return email;
     }
 
@@ -48,7 +48,7 @@ public class User {
         this.email = email;
     }
 
-    public Integer age() {
+    public Integer getAge() {
         return age;
     }
 
@@ -56,7 +56,7 @@ public class User {
         this.age = age;
     }
 
-    public List<Pet> pets() {
+    public List<Pet> getPets() {
         return pets;
     }
 
