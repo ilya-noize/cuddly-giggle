@@ -10,7 +10,7 @@ public record OwnerPetDto(
         Pet pet
 ) {
     public OwnerPetDto {
-        if (!Objects.equals(owner.id(), pet.userId())) {
+        if (!Objects.equals(owner.getId(), pet.userId())) {
             throw new IllegalArgumentException("Owner and user must be the same");
         }
     }
