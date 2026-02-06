@@ -44,7 +44,7 @@ class UserControllerTest {
         String name = UUID.randomUUID().toString().substring(0, 8);
         String email = name + "e@mail.com";
         int age = Integer.decode(name) % 100;
-        UserDto userDto = new UserDto(name, email, age);
+        userDto = new UserDto(name, email, age);
         createdUser = userService.createUser(userDto);
     }
 
