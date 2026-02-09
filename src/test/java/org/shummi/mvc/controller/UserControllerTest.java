@@ -1,19 +1,19 @@
 package org.shummi.mvc.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.shummi.mvc.service.UserService;
 import org.shummi.mvc.model.user.User;
 import org.shummi.mvc.model.user.model.UserDto;
+import org.shummi.mvc.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,7 @@ class UserControllerTest {
     void setUp() {
         String name = UUID.randomUUID().toString().substring(0, 8);
         String email = name + "e@mail.com";
-        int age = Integer.decode(name) % 100;
+        int age = Math.abs(name.hashCode() % 100 + 18);
         userDto = new UserDto(name, email, age);
         createdUser = userService.createUser(userDto);
     }
@@ -51,6 +51,11 @@ class UserControllerTest {
     @Test
     @DisplayName("POST: successfully create a valid entity")
     void post_shouldSuccessfullyCreateUser() throws Exception {
+        String name = UUID.randomUUID().toString().substring(2, 8);
+        String email = name + "e@mail.com";
+        int age = Math.abs(name.hashCode() % 100 + 18);
+        userDto = new UserDto(name, email, age);
+
         ResultActions performed = mock.perform(post("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userDto)));
