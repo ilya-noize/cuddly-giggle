@@ -3,8 +3,8 @@ package org.shummi.mvc.controller;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.shummi.mvc.pet.Pet;
-import org.shummi.mvc.pet.model.PetDto;
+import org.shummi.mvc.model.pet.Pet;
+import org.shummi.mvc.model.pet.model.PetDto;
 import org.shummi.mvc.service.PetService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/users")
 public class PetController {
-    private final Logger log = LogManager.getLogger(getClass());
+    private static final Logger log = LogManager.getLogger(PetController.class);
     private final PetService petService;
 
     public PetController(PetService petService) {

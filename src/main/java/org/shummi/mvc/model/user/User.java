@@ -1,17 +1,17 @@
-package org.shummi.mvc.user;
+package org.shummi.mvc.model.user;
 
-import org.shummi.mvc.pet.Pet;
+import org.shummi.mvc.model.pet.Pet;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class User {
     private Long id;
     private String name;
     private String email;
     private Integer age;
-    private List<Pet> pets = new ArrayList<>();
+    private List<Pet> pets = new CopyOnWriteArrayList<>();
 
     public User() {
     }

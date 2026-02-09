@@ -1,9 +1,9 @@
 package org.shummi.mvc.service;
 
-import org.shummi.mvc.pet.Pet;
-import org.shummi.mvc.pet.model.OwnerPetDto;
-import org.shummi.mvc.pet.model.PetDto;
-import org.shummi.mvc.user.User;
+import org.shummi.mvc.model.pet.Pet;
+import org.shummi.mvc.model.pet.model.OwnerPetDto;
+import org.shummi.mvc.model.pet.model.PetDto;
+import org.shummi.mvc.model.user.User;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

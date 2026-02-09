@@ -3,8 +3,8 @@ package org.shummi.mvc.controller;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.shummi.mvc.user.model.UserDto;
-import org.shummi.mvc.user.User;
+import org.shummi.mvc.model.user.model.UserDto;
+import org.shummi.mvc.model.user.User;
 import org.shummi.mvc.service.UserService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,8 +23,8 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
+    private static final Logger log = LogManager.getLogger(UserController.class);
     private final UserService userService;
-    private final Logger log = LogManager.getLogger(getClass());
 
     public UserController(UserService userService) {
         this.userService = userService;

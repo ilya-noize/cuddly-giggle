@@ -1,8 +1,8 @@
 package org.shummi.mvc.service;
 
 import org.shummi.mvc.exception.MvpException;
-import org.shummi.mvc.user.User;
-import org.shummi.mvc.user.model.UserDto;
+import org.shummi.mvc.model.user.User;
+import org.shummi.mvc.model.user.model.UserDto;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

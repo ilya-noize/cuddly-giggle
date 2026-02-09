@@ -1,4 +1,4 @@
-package org.shummi.mvc.pet;
+package org.shummi.mvc.model.pet;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -45,7 +45,7 @@ public class Pet {
     public final boolean equals(Object o) {
         if (!(o instanceof Pet pet)) return false;
 
-        return Objects.equals(id, pet.id) && name.equals(pet.name) && userId.equals(pet.userId);
+        return Objects.equals(id, pet.id);
     }
 
     @Override
