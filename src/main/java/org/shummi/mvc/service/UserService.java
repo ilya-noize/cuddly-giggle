@@ -6,37 +6,44 @@ import org.shummi.mvc.model.user.model.UserDto;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class UserService {
     private final Map<Long, User> users;
     private final Set<String> emails;
-    private long nextId;
+    private final AtomicLong nextId;
 
     UserService() {
-        this.users = new HashMap<>();
-        this.emails = new HashSet<>();
-        this.nextId = 0L;
+        this.users = new ConcurrentHashMap<>();
+        this.emails = new ConcurrentSkipListSet<>();
+        this.nextId = new AtomicLong(0);
     }
 
     public User createUser(UserDto request) {
-        User user = request.toEntity();
-        if (emails.contains(request.email())) {
+        boolean added = emails.add(request.email());
+        if (!added) {
             throw new MvpException("Duplicate email");
         }
-        user.setId(++nextId);
-        user.setPets(new ArrayList<>());
-        users.put(user.getId(), user);
-        emails.add(user.getEmail());
+        try {
+            User user = request.toEntity();
+            user.setId(nextId.incrementAndGet());
+            user.setPets(new ArrayList<>());
+            users.put(user.getId(), user);
 
-        return user;
+            return user;
+        } catch (Exception e) {
+            // rollback on error
+            emails.remove(request.email());
+            throw e;
+        }
     }
 
     public User updateUser(Long id, UserDto request) {
@@ -58,7 +65,7 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        return users.values().stream().toList();
+        return new ArrayList<>(users.values());
     }
 
     public void deleteById(Long id) {

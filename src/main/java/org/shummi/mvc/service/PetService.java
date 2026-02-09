@@ -6,45 +6,51 @@ import org.shummi.mvc.model.pet.model.PetDto;
 import org.shummi.mvc.model.user.User;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class PetService {
     private final Map<Long, Pet> pets;
-    private long nextId;
+    private final AtomicLong nextId;
     private final UserService userService;
 
     public PetService(UserService userService) {
-        this.pets = new HashMap<>();
+        this.pets = new ConcurrentHashMap<>();
         this.userService = userService;
+        this.nextId = new AtomicLong(0);
     }
 
     public Pet createPet(Long userId, PetDto request) {
         User user = userService.getUserById(userId);
         Pet pet = request.toEntity();
-        pet.setId(nextId++);
+        pet.setId(nextId.incrementAndGet());
         pet.setUserId(userId);
-        pets.put(pet.id(), pet);
+
         user.addPet(pet);
+        pets.put(pet.id(), pet);
 
         return pet;
     }
 
     public Pet updatePet(Long userId, Long id, PetDto request) {
         OwnerPetDto ownerPet = getUserAndCheckAccessToThemAll(userId, id);
-        Pet pet = request.toEntity();
-        pet.setId(id);
-        pet.setUserId(userId);
-        if (!ownerPet.pet().name().equals(pet.name())) {
-            pets.replace(id, pet);
-            ownerPet.owner().updatePet(pet);
+        User owner = ownerPet.owner();
+        Pet existingPet = ownerPet.pet();
+
+        if (existingPet.name().equals(request.name())) {
+            return existingPet;
         }
 
-        return pet;
+        Pet updatedPet = new Pet(id, request.name(), userId);
+        owner.updatePet(updatedPet);
+        pets.replace(id, updatedPet);
+
+        return updatedPet;
     }
 
     public Pet getPetById(Long userId, Long id) {
@@ -62,8 +68,10 @@ public class PetService {
 
     public void deleteById(Long userId, Long id) {
         OwnerPetDto ownerPet = getUserAndCheckAccessToThemAll(userId, id);
-        Pet removed = pets.remove(id);
-        ownerPet.owner().removePet(removed);
+        User owner = ownerPet.owner();
+        Pet pet = ownerPet.pet();
+        owner.removePet(pet);
+        pets.remove(id);
     }
 
     private OwnerPetDto getUserAndCheckAccessToThemAll(Long userId, Long id) {
