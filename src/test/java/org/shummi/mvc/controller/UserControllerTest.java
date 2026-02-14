@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.shummi.mvc.model.user.User;
-import org.shummi.mvc.model.user.model.UserDto;
+import org.shummi.mvc.model.user.UserRequestDto;
 import org.shummi.mvc.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,7 +36,6 @@ class UserControllerTest {
     @Autowired
     private UserService userService;
 
-    private UserDto userDto;
     private User createdUser;
 
     @BeforeEach
@@ -44,8 +43,14 @@ class UserControllerTest {
         String name = UUID.randomUUID().toString().substring(0, 8);
         String email = name + "e@mail.com";
         int age = Math.abs(name.hashCode() % 100 + 18);
-        userDto = new UserDto(name, email, age);
-        createdUser = userService.createUser(userDto);
+        createdUser = userService.createUser(
+                new User(
+                        null,
+                        name,
+                        email,
+                        age,
+                        new ArrayList<>()
+                ));
     }
 
     @Test
@@ -53,12 +58,12 @@ class UserControllerTest {
     void post_shouldSuccessfullyCreateUser() throws Exception {
         String name = UUID.randomUUID().toString().substring(2, 8);
         String email = name + "e@mail.com";
-        int age = Math.abs(name.hashCode() % 100 + 18);
-        userDto = new UserDto(name, email, age);
+        int age = 18;
+        UserRequestDto dto = new UserRequestDto(name, email, age);
 
         ResultActions performed = mock.perform(post("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDto)));
+                .content(objectMapper.writeValueAsString(dto)));
         String json = performed.andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
@@ -69,16 +74,16 @@ class UserControllerTest {
 
         Assertions.assertNotNull(createdUser);
         assertThat(createdUser.getId()).isNotNull();
-        assertThat(createdUser.getName()).isEqualTo(userDto.name());
-        assertThat(createdUser.getEmail()).isEqualTo(userDto.email());
-        assertThat(createdUser.getAge()).isEqualTo(userDto.age());
+        assertThat(createdUser.getName()).isEqualTo(dto.name());
+        assertThat(createdUser.getEmail()).isEqualTo(dto.email());
+        assertThat(createdUser.getAge()).isEqualTo(dto.age());
         assertThat(createdUser.getPets()).isEqualTo(new ArrayList<>());
     }
 
     @Test
     @DisplayName("POST: bad request when name is blank")
     void post_shouldBadRequestWhenCreateUserGetNameIsBlank() throws Exception {
-        var dto = new UserDto(" ", "mail0002@mail.com", 12);
+        var dto = new UserRequestDto(" ", "mail0002@mail.com", 12);
 
         String json = objectMapper.writeValueAsString(dto);
         mock.perform(post("/api/v1/users")
@@ -90,7 +95,7 @@ class UserControllerTest {
     @Test
     @DisplayName("POST: bad request when email is invalid")
     void post_shouldBadRequestWhenCreateUserEmailIsInvalided() throws Exception {
-        var dto = new UserDto("name", "user/127.0.0.1:8080", null);
+        var dto = new UserRequestDto("name", "user/127.0.0.1:8080", null);
 
         String json = objectMapper.writeValueAsString(dto);
         mock.perform(post("/api/v1/users")
@@ -102,7 +107,7 @@ class UserControllerTest {
     @Test
     @DisplayName("POST: bad request when age is null")
     void post_shouldBadRequestWhenCreateUserAgeIsNull() throws Exception {
-        var dto = new UserDto("name", "mail0002@mail.com", null);
+        var dto = new UserRequestDto("name", "mail0002@mail.com", null);
 
         String json = objectMapper.writeValueAsString(dto);
         mock.perform(post("/api/v1/users")
@@ -147,7 +152,11 @@ class UserControllerTest {
     @Test
     @DisplayName("PUT: successfully update an existing record.")
     void put_shouldSuccessfullyUpdateExistingEntity() throws Exception {
-        var updateDto = new UserDto("updated-name", createdUser.getEmail(), createdUser.getAge());
+        var updateDto = new UserRequestDto(
+                "updated-name",
+                createdUser.getEmail(),
+                createdUser.getAge()
+        );
 
         String json = objectMapper.writeValueAsString(updateDto);
         ResultActions performed = mock.perform(put("/api/v1/users/{id}", createdUser.getId())
@@ -162,7 +171,7 @@ class UserControllerTest {
     @Test
     @DisplayName("PUT: bad request on update invalid data")
     void put_shouldReturnedBadRequestOnInvalidDataInPutMethod() throws Exception {
-        var invalidDto = new UserDto(" ", createdUser.getEmail(), createdUser.getAge());
+        var invalidDto = new UserRequestDto(" ", createdUser.getEmail(), createdUser.getAge());
 
         String json = objectMapper.writeValueAsString(invalidDto);
         mock.perform(put("/api/v1/users/{id}", createdUser.getId())
@@ -174,7 +183,7 @@ class UserControllerTest {
     @Test
     @DisplayName("PUT: bad Request when updating email.")
     void shouldReturnedBadRequestIfChangeEmailInPutMethod() throws Exception {
-        var dto = new UserDto(createdUser.getName(), "other-email@email.ru", createdUser.getAge());
+        var dto = new UserRequestDto(createdUser.getName(), "other-email@email.ru", createdUser.getAge());
 
         String json = objectMapper.writeValueAsString(dto);
         mock.perform(put("/api/v1/users/{id}", createdUser.getId())
