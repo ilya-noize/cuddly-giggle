@@ -1,8 +1,7 @@
 package org.shummi.mvc.service;
 
+import org.shummi.mvc.model.pet.OwnerPetDto;
 import org.shummi.mvc.model.pet.Pet;
-import org.shummi.mvc.model.pet.model.OwnerPetDto;
-import org.shummi.mvc.model.pet.model.PetDto;
 import org.shummi.mvc.model.user.User;
 import org.springframework.stereotype.Service;
 
@@ -25,9 +24,8 @@ public class PetService {
         this.nextId = new AtomicLong(0);
     }
 
-    public Pet createPet(Long userId, PetDto request) {
+    public Pet createPet(Long userId, Pet pet) {
         User user = userService.getUserById(userId);
-        Pet pet = request.toEntity();
         pet.setId(nextId.incrementAndGet());
         pet.setUserId(userId);
 
@@ -37,16 +35,16 @@ public class PetService {
         return pet;
     }
 
-    public Pet updatePet(Long userId, Long id, PetDto request) {
+    public Pet updatePet(Long userId, Long id, Pet pet) {
         OwnerPetDto ownerPet = getUserAndCheckAccessToThemAll(userId, id);
         User owner = ownerPet.owner();
         Pet existingPet = ownerPet.pet();
 
-        if (existingPet.name().equals(request.name())) {
+        if (existingPet.name().equals(pet.name())) {
             return existingPet;
         }
 
-        Pet updatedPet = new Pet(id, request.name(), userId);
+        Pet updatedPet = new Pet(id, pet.name(), userId);
         owner.updatePet(updatedPet);
         pets.replace(id, updatedPet);
 

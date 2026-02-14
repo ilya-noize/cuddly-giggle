@@ -2,7 +2,6 @@ package org.shummi.mvc.service;
 
 import org.shummi.mvc.exception.MvpException;
 import org.shummi.mvc.model.user.User;
-import org.shummi.mvc.model.user.model.UserDto;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,13 +26,12 @@ public class UserService {
         this.nextId = new AtomicLong(0);
     }
 
-    public User createUser(UserDto request) {
-        boolean added = emails.add(request.email());
+    public User createUser(User user) {
+        boolean added = emails.add(user.getEmail());
         if (!added) {
             throw new MvpException("Duplicate email");
         }
         try {
-            User user = request.toEntity();
             user.setId(nextId.incrementAndGet());
             user.setPets(new ArrayList<>());
             users.put(user.getId(), user);
@@ -41,19 +39,18 @@ public class UserService {
             return user;
         } catch (Exception e) {
             // rollback on error
-            emails.remove(request.email());
+            emails.remove(user.getEmail());
             throw e;
         }
     }
 
-    public User updateUser(Long id, UserDto request) {
-        User user = getUserById(id);
-        User entity = request.toEntity();
-        if (!entity.getEmail().equals(user.getEmail())) {
+    public User updateUser(Long id, User entity) {
+        User existingUser = getUserById(id);
+        if (!entity.getEmail().equals(existingUser.getEmail())) {
             throw new MvpException("Email cannot be changed");
         }
         entity.setId(id);
-        entity.setPets(user.getPets());
+        entity.setPets(entity.getPets());
         users.put(id, entity);
 
         return entity;

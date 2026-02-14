@@ -1,6 +1,5 @@
-package org.shummi.mvc.model.pet.model;
+package org.shummi.mvc.model.pet;
 
-import org.shummi.mvc.model.pet.Pet;
 import org.shummi.mvc.model.user.User;
 
 import java.util.Objects;

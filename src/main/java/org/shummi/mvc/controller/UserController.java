@@ -3,8 +3,9 @@ package org.shummi.mvc.controller;
 import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.shummi.mvc.model.user.model.UserDto;
-import org.shummi.mvc.model.user.User;
+import org.shummi.mvc.controller.converter.UserDtoConverter;
+import org.shummi.mvc.model.user.UserRequestDto;
+import org.shummi.mvc.model.user.UserResponseDto;
 import org.shummi.mvc.service.UserService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,52 +21,58 @@ import java.util.List;
 import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
-@RequestMapping("/api/v1/users")
 public class UserController {
     private static final Logger log = LogManager.getLogger(UserController.class);
     private final UserService userService;
+    private final UserDtoConverter dtoConverter;
 
-    public UserController(UserService userService) {
+    public UserController(
+            UserService userService,
+            UserDtoConverter dtoConverter
+    ) {
         this.userService = userService;
+        this.dtoConverter = dtoConverter;
     }
 
-    @PostMapping
+    @PostMapping("/api/v1/users")
     @ResponseStatus(CREATED)
-    public User create(
-            @RequestBody @Valid UserDto request
+    public UserResponseDto create(
+            @RequestBody @Valid UserRequestDto request
     ) {
         log.debug("Creating user: {}", request.toString());
 
-        return userService.createUser(request);
+        return dtoConverter.toDto(userService.createUser(dtoConverter.toEntity(request)));
     }
 
-    @PutMapping("{id}")
-    public User update(
+    @PutMapping("/api/v1/users/{id}")
+    public UserResponseDto update(
             @PathVariable("id") long id,
-            @RequestBody @Valid UserDto request
+            @RequestBody @Valid UserRequestDto request
     ) {
         log.debug("Updating a user by ID={}", id);
 
-        return userService.updateUser(id, request);
+        return dtoConverter.toDto(userService.updateUser(id, dtoConverter.toEntity(request)));
     }
 
-    @GetMapping("{id}")
-    public User get(
+    @GetMapping("/api/v1/users/{id}")
+    public UserResponseDto get(
             @PathVariable Long id
     ) {
         log.debug("Getting user by ID={}", id);
 
-        return userService.getUserById(id);
+        return dtoConverter.toDto(userService.getUserById(id));
     }
 
-    @GetMapping
-    public List<User> getAll() {
+    @GetMapping("/api/v1/users")
+    public List<UserResponseDto> getAll() {
         log.debug("Getting all users");
 
-        return userService.getAllUsers();
+        return userService.getAllUsers().stream()
+                .map(dtoConverter::toDto)
+                .toList();
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/api/v1/users/{id}")
     public void delete(
             @PathVariable Long id
     ) {
